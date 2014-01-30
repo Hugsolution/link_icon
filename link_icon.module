@@ -1,0 +1,79 @@
+<?php
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function link_icon_field_formatter_info() {
+  return array(
+    'link_icon_show' => array(
+      'label' => t('Link icon'),
+      'field types' => array('file'),
+    ),
+    'link_icon_show_size' => array(
+      'label' => t('Link icon size'),
+      'field types' => array('file'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function link_icon_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+
+  switch ($display['type']) {
+
+    case 'link_icon_show':
+
+      foreach ($items as $delta => $item) {
+
+        $file = (object) $item;
+
+        $url = file_create_url($file->uri);
+
+        $icon_directory = variable_get('file_icon_directory', drupal_get_path('module', 'file') . '/icons');
+
+        $icon = theme('file_icon', array('file' => $file, 'icon_directory' => $icon_directory));
+
+        $options['attributes']['title'] = check_plain($file->filename);
+
+        $options['html'] = TRUE;
+
+        $link_icon = '<span class="file">' . l($icon, $url, $options) . '</span>';
+
+
+        $element[$delta] = $element[$delta] = array('#markup' => $link_icon);
+      }
+
+      break;
+          case 'link_icon_show_size':
+
+      foreach ($items as $delta => $item) {
+
+        $file = (object) $item;
+
+        $url = file_create_url($file->uri);
+
+        $file_size = format_size($file->filesize);
+
+        $icon_directory = variable_get('file_icon_directory', drupal_get_path('module', 'file') . '/icons');
+
+        $icon = theme('file_icon', array('file' => $file, 'icon_directory' => $icon_directory));
+
+        $options['attributes']['title'] = check_plain($file->filename);
+
+        $options['html'] = TRUE;
+
+        $link_icon = '<span class="file">' . l($icon, $url, $options) . ' ('. $file_size . ')</span>';
+
+
+        $element[$delta] = $element[$delta] = array('#markup' => $link_icon);
+      }
+
+      break;
+
+  }
+
+  return $element;
+}
